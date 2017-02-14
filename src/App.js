@@ -8,9 +8,9 @@ class App extends Component {
   };
 
   componentDidMount() {
-    this.setState({
-      value: 50
-    });
+    // this.setState({
+    //   value: 50
+    // });
     //or
     setTimeout(
       () => this.setState({
