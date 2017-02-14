@@ -1,8 +1,7 @@
 import Inferno from "inferno";
 import Component from "inferno-component";
-import Logo from "./logo";
-import "./App.css";
 import Rheostat from "rheostat";
+
 function sleep(milliseconds) {
   var start = new Date().getTime();
   for (var i = 0; i < 1e7; i++) {
@@ -26,7 +25,8 @@ class TestComponent extends Component {
   }
 
   logNewValue = () => {
-    console.log(this.props.value, this.state.value);
+    console.log("Child has as props", this.props.value);
+    console.log("Child has as state", this.state.value);
   };
 
   render() {
@@ -40,7 +40,7 @@ class App extends Component {
   };
 
   logNewValue = () => {
-    console.log("parent", this.state.value);
+    console.log("The parent class sees its state as", this.state.value);
   };
   componentDidMount() {
     this.setState(
@@ -71,21 +71,14 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App">
+      <div>
         <TestComponent value={this.state.value} />
-        <div className="App-header">
-          <Logo width="80" height="80" />
-          <h2>Welcome to Inferno</h2>
-        </div>
         <Rheostat
           min={5}
           max={100}
           values={[this.state.value]}
           onChange={this.onChange}
         />
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
       </div>
     );
   }
