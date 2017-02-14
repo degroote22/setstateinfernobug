@@ -2,15 +2,6 @@ import Inferno from "inferno";
 import Component from "inferno-component";
 import Rheostat from "rheostat";
 
-function sleep(milliseconds) {
-  var start = new Date().getTime();
-  for (var i = 0; i < 1e7; i++) {
-    if (new Date().getTime() - start > milliseconds) {
-      break;
-    }
-  }
-}
-
 class TestComponent extends Component {
   constructor(props) {
     super(props);
@@ -21,7 +12,6 @@ class TestComponent extends Component {
   componentWillReceiveProps(nextProps) {
     const { value } = nextProps;
     this.setState({ value }, () => this.logNewValue());
-    sleep(500);
   }
 
   logNewValue = () => {
@@ -64,9 +54,12 @@ class App extends Component {
   }
 
   onChange = evt => {
-    this.setState({
-      value: evt.values[0]
-    });
+    this.setState(
+      {
+        value: evt.values[0]
+      },
+      this.logNewValue
+    );
   };
 
   render() {
