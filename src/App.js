@@ -1,6 +1,5 @@
 import Inferno from "inferno";
 import Component from "inferno-component";
-import Rheostat from "rheostat";
 
 class TestComponent extends Component {
   constructor(props) {
@@ -9,35 +8,52 @@ class TestComponent extends Component {
       value: props.value
     };
   }
-  componentWillReceiveProps(nextProps) {
-    const { value } = nextProps;
-    this.setState({ value }, () => this.logNewValue());
-  }
 
-  logNewValue = () => {
-    console.log("Child has as props", this.props.value);
-    console.log("Child has as state", this.state.value);
+  afterUpdate = caller => () => {
+    console.log(
+      "On " + caller + " the child sees its state as",
+      this.state.value
+    );
+    this.props.onChange(this.state.value);
   };
 
+  updateValues = () => {
+    this.setState(
+      {
+        value: this.props.value
+      },
+      this.afterUpdate("updateValues")
+    );
+  };
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.value !== this.props.value) {
+      this.updateValues();
+    }
+  }
+
   render() {
-    return <div>{this.state.value}</div>;
+    return <div>{this.props.value}</div>;
   }
 }
 
 class App extends Component {
   state = {
-    value: 3
+    value: 9
   };
 
-  logNewValue = () => {
-    console.log("The parent class sees its state as", this.state.value);
+  logNewValue = caller => () => {
+    console.log(
+      "On " + caller + " the parent sees its state as",
+      this.state.value
+    );
   };
   componentDidMount() {
     this.setState(
       {
         value: 7
       },
-      this.logNewValue
+      this.logNewValue("componentDidMount")
     );
 
     setTimeout(
@@ -46,32 +62,21 @@ class App extends Component {
           {
             value: 50
           },
-          this.logNewValue
+          this.logNewValue("timeOut componentDidMount")
         );
       },
       1
     );
   }
 
-  onChange = evt => {
-    this.setState(
-      {
-        value: evt.values[0]
-      },
-      this.logNewValue
-    );
+  onChange = value => {
+    this.setState({ value }, this.logNewValue("onChange"));
   };
 
   render() {
     return (
       <div>
-        <TestComponent value={this.state.value} />
-        <Rheostat
-          min={5}
-          max={100}
-          values={[this.state.value]}
-          onChange={this.onChange}
-        />
+        <TestComponent value={this.state.value} onChange={this.onChange} />
       </div>
     );
   }
