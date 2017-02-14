@@ -9,26 +9,28 @@ class TestComponent extends Component {
     };
   }
 
-  afterUpdate = caller => () => {
+  fireChange = caller => () => {
+    const value = this.state.value;
     console.log(
-      "On " + caller + " the child sees its state as",
-      this.state.value
+      "Firing change. It was called by the callback of setState on updateValues where we set value to 50. It should be 50 but it is:",
+      value
     );
-    this.props.onChange(this.state.value);
+    this.props.onChange(value);
   };
 
-  updateValues = () => {
+  updateValues = value => {
+    console.log("About to update value to", value, "and call fireChange");
     this.setState(
       {
-        value: this.props.value
+        value
       },
-      this.afterUpdate("updateValues")
+      this.fireChange()
     );
   };
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.value !== this.props.value) {
-      this.updateValues();
+      this.updateValues(nextProps.value);
     }
   }
 
@@ -44,28 +46,19 @@ class App extends Component {
 
   logNewValue = caller => () => {
     console.log(
-      "On " + caller + " the parent sees its state as",
+      "After " + caller + " the parent sees its state as",
       this.state.value
     );
   };
   componentDidMount() {
-    this.setState(
-      {
-        value: 7
-      },
-      this.logNewValue("componentDidMount")
-    );
-
     setTimeout(
-      () => {
-        this.setState(
-          {
-            value: 50
-          },
-          this.logNewValue("timeOut componentDidMount")
-        );
-      },
-      1
+      () => this.setState(
+        {
+          value: 50
+        },
+        this.logNewValue("componentDidMount timeout")
+      ),
+      300
     );
   }
 
@@ -74,9 +67,11 @@ class App extends Component {
   };
 
   render() {
+    const value = this.state.value;
+    console.log("Rendering:", value);
     return (
       <div>
-        <TestComponent value={this.state.value} onChange={this.onChange} />
+        <TestComponent value={value} onChange={this.onChange} />
       </div>
     );
   }
